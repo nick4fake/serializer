@@ -12,7 +12,7 @@
         }
     ],
     "replace": {
-        "jms/serializer": "dev-master"
+        "jms/serializer": "*"
     },
     "require": {
         "php": ">=5.3.2",
