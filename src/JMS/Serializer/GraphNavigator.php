@@ -187,6 +187,16 @@ final class GraphNavigator
                 /** @var $metadata ClassMetadata */
                 $metadata = $this->metadataFactory->getMetadataForClass($type['name']);
 
+                // TODO: pull request
+                if ($context instanceof SerializationContext && is_object($data) && $metadata->name !== get_class($data) && $metadata->discriminatorMap) {
+                    foreach ($metadata->discriminatorMap as $className) {
+                        if ($data instanceof $className) {
+                            $metadata = $this->metadataFactory->getMetadataForClass($className);
+                            break;
+                        }
+                    }
+                }
+
                 if ($context instanceof DeserializationContext && ! empty($metadata->discriminatorMap) && $type['name'] === $metadata->discriminatorBaseClass) {
                     $metadata = $this->resolveMetadata($context, $data, $metadata);
                 }
