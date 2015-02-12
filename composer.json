@@ -11,6 +11,9 @@
             "email": "schmittjoh@gmail.com"
         }
     ],
+    "replace": {
+        "jms/serializer": "dev-master"
+    },
     "require": {
         "php": ">=5.3.2",
         "jms/metadata": "~1.1",
