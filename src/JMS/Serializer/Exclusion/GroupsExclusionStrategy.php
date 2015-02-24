@@ -18,20 +18,50 @@
 
 namespace JMS\Serializer\Exclusion;
 
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Context;
+use JMS\Serializer\SerializationContext;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
+/**
+ * Patched by Bogdan Yurov <bogdan@yurov.me>
+ *
+ * Added support for "+" in groups (multiple groups at time could be checked).
+ *
+ *
+ */
 class GroupsExclusionStrategy implements ExclusionStrategyInterface
 {
     const DEFAULT_GROUP = 'Default';
 
-    private $groups = array();
+    private $groups = [];
 
     public function __construct(array $groups)
     {
+        $this->setGroups($groups);
+
+        $this->language = new ExpressionLanguage();
+        $this->language->addFunction(new ExpressionFunction('g', function ($arg) {
+            return sprintf('g(%s)', $arg);
+        }, function () {
+            $val = func_get_args();
+            $variables = array_shift($val);
+            foreach ($val as $k) {
+                if (!isset($variables['groups'][$k])) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+    }
+
+    public function setGroups(array $groups)
+    {
         if (empty($groups)) {
-            $groups = array(self::DEFAULT_GROUP);
+            $groups = [self::DEFAULT_GROUP];
         }
 
         foreach ($groups as $group) {
@@ -52,11 +82,19 @@ class GroupsExclusionStrategy implements ExclusionStrategyInterface
      */
     public function shouldSkipProperty(PropertyMetadata $property, Context $navigatorContext)
     {
-        if ( ! $property->groups) {
-            return ! isset($this->groups[self::DEFAULT_GROUP]);
+        if (!$property->groups) {
+            return !isset($this->groups[self::DEFAULT_GROUP]);
         }
 
         foreach ($property->groups as $group) {
+            if ($group[0] === '=') {
+                return !$this->language->evaluate(substr($group, 1), [
+                    'groups' => $this->groups,
+                    'write'  => $navigatorContext instanceof DeserializationContext,
+                    'read'   => $navigatorContext instanceof SerializationContext,
+                ]);
+            }
+
             if (isset($this->groups[$group])) {
                 return false;
             }

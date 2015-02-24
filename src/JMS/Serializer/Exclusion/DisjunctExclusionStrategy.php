@@ -48,6 +48,16 @@ class DisjunctExclusionStrategy implements ExclusionStrategyInterface
         $this->delegates = $delegates;
     }
 
+    public function findStrategy(callable $checker){
+        foreach($this->delegates as $delegate){
+            if($checker($delegate, $this)){
+                return $delegate;
+            }
+        }
+
+        return null;
+    }
+
     public function addStrategy(ExclusionStrategyInterface $strategy)
     {
         $this->delegates->add($strategy);

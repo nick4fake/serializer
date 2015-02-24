@@ -194,7 +194,7 @@ class AnnotationDriver implements DriverInterface
                     } elseif ($annot instanceof Groups) {
                         $propertyMetadata->groups = $annot->groups;
                         foreach ((array) $propertyMetadata->groups as $groupName) {
-                            if (false !== strpos($groupName, ',')) {
+                            if (false !== strpos($groupName, ',') && $groupName[0] !== '=') {
                                 throw new InvalidArgumentException(sprintf(
                                     'Invalid group name "%s" on "%s", did you mean to create multiple groups?',
                                     implode(', ', $propertyMetadata->groups),

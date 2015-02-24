@@ -2,3 +2,4 @@ Serializer [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/schmittjoh
 ==========
 
 Learn more about it in its [documentation](http://jmsyst.com/libs/serializer).
+

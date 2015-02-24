@@ -48,7 +48,7 @@ abstract class Context
     /** @var MetadataFactory */
     private $metadataFactory;
 
-    /** @var ExclusionStrategyInterface */
+    /** @var ExclusionStrategyInterface|DisjunctExclusionStrategy */
     private $exclusionStrategy;
 
     /** @var boolean */
@@ -62,6 +62,10 @@ abstract class Context
     public function __construct()
     {
         $this->attributes = new Map();
+
+        $this->exclusionStrategy = new DisjunctExclusionStrategy([]);
+
+        $this->setGroups(['Default']);
     }
 
     /**
@@ -127,12 +131,6 @@ abstract class Context
     {
         $this->assertMutable();
 
-        if (null === $this->exclusionStrategy) {
-            $this->exclusionStrategy = $strategy;
-
-            return $this;
-        }
-
         if ($this->exclusionStrategy instanceof DisjunctExclusionStrategy) {
             $this->exclusionStrategy->addStrategy($strategy);
 
@@ -172,7 +170,15 @@ abstract class Context
         }
 
         $this->attributes->set('groups', (array) $groups);
-        $this->addExclusionStrategy(new GroupsExclusionStrategy((array) $groups));
+
+        $strat = $this->exclusionStrategy->findStrategy(function($strategy){
+            return $strategy instanceof GroupsExclusionStrategy;
+        });
+        if($strat instanceof GroupsExclusionStrategy){
+            $strat->setGroups((array) $groups);
+        } else {
+            $this->addExclusionStrategy(new GroupsExclusionStrategy((array) $groups));
+        }
 
         return $this;
     }
