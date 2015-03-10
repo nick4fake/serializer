@@ -19,6 +19,7 @@
 namespace JMS\Serializer\Metadata\Driver;
 
 use JMS\Serializer\Annotation\Discriminator;
+use JMS\Serializer\Annotation\GroupPatcher;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Annotation\HandlerCallback;
 use JMS\Serializer\Annotation\AccessorOrder;
@@ -70,8 +71,8 @@ class AnnotationDriver implements DriverInterface
         $classMetadata = new ClassMetadata($name = $class->name);
         $classMetadata->fileResources[] = $class->getFilename();
 
-        $propertiesMetadata = array();
-        $propertiesAnnotations = array();
+        $propertiesMetadata = [];
+        $propertiesAnnotations = [];
 
         $exclusionPolicy = 'NONE';
         $excludeAll = false;
@@ -127,6 +128,9 @@ class AnnotationDriver implements DriverInterface
                 } elseif ($annot instanceof HandlerCallback) {
                     $classMetadata->addHandlerCallback(GraphNavigator::parseDirection($annot->direction), $annot->format, $method->name);
                     continue 2;
+                } elseif ($annot instanceof GroupPatcher) {
+                    $classMetadata->addGroupPatcher($method->name);
+                    continue 2;
                 }
             }
         }
@@ -145,7 +149,7 @@ class AnnotationDriver implements DriverInterface
                 $isExpose = $propertyMetadata instanceof VirtualPropertyMetadata;
                 $propertyMetadata->readOnly = $propertyMetadata->readOnly || $readOnlyClass;
                 $accessType = $classAccessType;
-                $accessor = array(null, null);
+                $accessor = [null, null];
 
                 $propertyAnnotations = $propertiesAnnotations[$propertyKey];
 
@@ -190,7 +194,7 @@ class AnnotationDriver implements DriverInterface
                     } elseif ($annot instanceof ReadOnly) {
                         $propertyMetadata->readOnly = $annot->readOnly;
                     } elseif ($annot instanceof Accessor) {
-                        $accessor = array($annot->getter, $annot->setter);
+                        $accessor = [$annot->getter, $annot->setter];
                     } elseif ($annot instanceof Groups) {
                         $propertyMetadata->groups = $annot->groups;
                         foreach ((array) $propertyMetadata->groups as $groupName) {

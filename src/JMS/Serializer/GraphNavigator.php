@@ -28,6 +28,7 @@ use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\Metadata\ClassMetadata;
 use Metadata\MetadataFactoryInterface;
 use JMS\Serializer\Exception\InvalidArgumentException;
+use PhpOption\Some;
 
 /**
  * Handles traversal along the object graph.
@@ -100,12 +101,12 @@ final class GraphNavigator
                 $typeName = get_class($data);
             }
 
-            $type = array('name' => $typeName, 'params' => array());
+            $type = ['name' => $typeName, 'params' => []];
         }
         // If the data is null, we have to force the type to null regardless of the input in order to
         // guarantee correct handling of null values, and not have any internal auto-casting behavior.
         else if ($context instanceof SerializationContext && null === $data) {
-            $type = array('name' => 'NULL', 'params' => array());
+            $type = ['name' => 'NULL', 'params' => []];
         }
 
         switch ($type['name']) {
@@ -150,7 +151,7 @@ final class GraphNavigator
                     // metadata for the actual type of the object, not the base class.
                     if (class_exists($type['name'], false) || interface_exists($type['name'], false)) {
                         if (is_subclass_of($data, $type['name'], false)) {
-                            $type = array('name' => get_class($data), 'params' => array());
+                            $type = ['name' => get_class($data), 'params' => []];
                         }
                     }
                 } elseif ($context instanceof DeserializationContext) {
@@ -241,9 +242,22 @@ final class GraphNavigator
                         continue;
                     }
 
+                    $groupsOld = $groups= $context->getGroups()->get();
+                    foreach($metadata->groupPatchers as $patcher){
+                        $groups = $object->{$patcher}(
+                            $groups,
+                            $propertyMetadata,
+                            $context instanceof SerializationContext ? null : $data,
+                            $context
+                        );
+                    }
+                    $context->setGroups($groups);
+
                     $context->pushPropertyMetadata($propertyMetadata);
                     $visitor->visitProperty($propertyMetadata, $data, $context);
                     $context->popPropertyMetadata();
+
+                    $context->setGroups($groupsOld);
                 }
 
                 if ($context instanceof SerializationContext) {

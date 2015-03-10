@@ -50,6 +50,7 @@ class ClassMetadata extends MergeableClassMetadata
     public $accessorOrder;
     public $customOrder;
     public $handlerCallbacks = array();
+    public $groupPatchers = array();
 
     public $discriminatorDisabled = false;
     public $discriminatorBaseClass;
@@ -129,6 +130,14 @@ class ClassMetadata extends MergeableClassMetadata
         $this->handlerCallbacks[$direction][$format] = $methodName;
     }
 
+    /**
+     * @param string $methodName
+     */
+    public function addGroupPatcher($methodName)
+    {
+        $this->groupPatchers[] = $methodName;
+    }
+
     public function merge(MergeableInterface $object)
     {
         if ( ! $object instanceof ClassMetadata) {
@@ -145,6 +154,8 @@ class ClassMetadata extends MergeableClassMetadata
 
         // Handler methods are taken from the outer class completely.
         $this->handlerCallbacks = $object->handlerCallbacks;
+        // Group patchers are taken from the outer class completely.
+        $this->groupPatchers = $object->groupPatchers;
 
         if ($object->accessorOrder) {
             $this->accessorOrder = $object->accessorOrder;
@@ -225,6 +236,7 @@ class ClassMetadata extends MergeableClassMetadata
             $this->accessorOrder,
             $this->customOrder,
             $this->handlerCallbacks,
+            $this->groupPatchers,
             $this->discriminatorDisabled,
             $this->discriminatorBaseClass,
             $this->discriminatorFieldName,
@@ -246,6 +258,7 @@ class ClassMetadata extends MergeableClassMetadata
             $this->accessorOrder,
             $this->customOrder,
             $this->handlerCallbacks,
+            $this->groupPatchers,
             $this->discriminatorDisabled,
             $this->discriminatorBaseClass,
             $this->discriminatorFieldName,

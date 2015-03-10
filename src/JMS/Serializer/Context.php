@@ -183,6 +183,14 @@ abstract class Context
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getGroups()
+    {
+        return  $this->attributes->get('groups');
+    }
+
     public function enableMaxDepthChecks()
     {
         $this->addExclusionStrategy(new DepthExclusionStrategy());

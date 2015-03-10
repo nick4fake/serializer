@@ -64,6 +64,7 @@ class GroupsExclusionStrategy implements ExclusionStrategyInterface
             $groups = [self::DEFAULT_GROUP];
         }
 
+        $this->groups = [];
         foreach ($groups as $group) {
             $this->groups[$group] = true;
         }
