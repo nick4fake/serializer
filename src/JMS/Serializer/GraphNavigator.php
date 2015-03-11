@@ -43,6 +43,8 @@ final class GraphNavigator
     const DIRECTION_SERIALIZATION = 1;
     const DIRECTION_DESERIALIZATION = 2;
 
+    const SKIP_HANDLER = '{9127E0F5-E527-47C2-831D-F9BC594C9DB6}';
+
     private $dispatcher;
     private $metadataFactory;
     private $handlerRegistry;
@@ -227,9 +229,11 @@ final class GraphNavigator
                         $context instanceof SerializationContext ? null : $data,
                         $context
                     );
-                    $this->afterVisitingObject($metadata, $object, $type, $context);
 
-                    return $context instanceof SerializationContext ? $rs : $object;
+                    if($rs !== static::SKIP_HANDLER) {
+                        $this->afterVisitingObject($metadata, $object, $type, $context);
+                        return $context instanceof SerializationContext ? $rs : $object;
+                    }
                 }
 
                 $visitor->startVisitingObject($metadata, $object, $type, $context);
