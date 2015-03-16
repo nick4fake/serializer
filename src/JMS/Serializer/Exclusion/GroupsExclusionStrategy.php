@@ -18,10 +18,10 @@
 
 namespace JMS\Serializer\Exclusion;
 
+use JMS\Serializer\Context;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
-use JMS\Serializer\Context;
 use JMS\Serializer\SerializationContext;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -89,14 +89,15 @@ class GroupsExclusionStrategy implements ExclusionStrategyInterface
 
         foreach ($property->groups as $group) {
             if ($group[0] === '=') {
-                return !$this->language->evaluate(substr($group, 1), [
+                $check = $this->language->evaluate(substr($group, 1), [
                     'groups' => $this->groups,
                     'write'  => $navigatorContext instanceof DeserializationContext,
                     'read'   => $navigatorContext instanceof SerializationContext,
                 ]);
-            }
-
-            if (isset($this->groups[$group])) {
+                if ($check) {
+                    return false;
+                };
+            } elseif (isset($this->groups[$group])) {
                 return false;
             }
         }
