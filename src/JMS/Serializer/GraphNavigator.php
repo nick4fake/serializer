@@ -231,6 +231,7 @@ final class GraphNavigator
                     );
 
                     if($rs !== static::SKIP_HANDLER) {
+                        // TODO: Это дикий баг, хандлеры вызываются после окончания посещения объекта
                         $this->afterVisitingObject($metadata, $object, $type, $context);
                         return $context instanceof SerializationContext ? $rs : $object;
                     }
