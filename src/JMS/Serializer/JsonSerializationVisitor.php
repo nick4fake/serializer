@@ -26,6 +26,9 @@ class JsonSerializationVisitor extends GenericSerializationVisitor
 
     public function getResult()
     {
+        if($this->getRoot() instanceof \ArrayObject) {
+            $this->setRoot((array) $this->getRoot());
+        }
         $result = @json_encode($this->getRoot(), $this->options);
 
         switch (json_last_error()) {
@@ -53,6 +56,7 @@ class JsonSerializationVisitor extends GenericSerializationVisitor
     public function visitArray($data, array $type, Context $context)
     {
         $result = parent::visitArray($data, $type, $context);
+
 
         if (null !== $this->getRoot() && isset($type['params'][1]) && 0 === count($result)) {
             // ArrayObject is specially treated by the json_encode function and
