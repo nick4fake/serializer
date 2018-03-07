@@ -21,7 +21,7 @@
         "phpcollection/phpcollection": "~0.1",
         "symfony/expression-language": "2.*|~3.0.1",
         "doctrine/annotations": "1.*",
-        "doctrine/instantiator": "~1.0.3"
+        "doctrine/instantiator": "~1.1.0"
     },
     "conflict": {
         "twig/twig": "<1.12"
